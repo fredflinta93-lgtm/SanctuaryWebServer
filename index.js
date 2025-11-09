@@ -1,28 +1,25 @@
-import WebSocket, { WebSocketServer } from "ws";
-
+// index.js
 const PORT = process.env.PORT || 43661;
-const wss = new WebSocketServer({ port: PORT });
 
-console.log(`✅ Sanctuary BotServer körs på ws://localhost:${PORT}`);
+const { Server } = require("socket.io");
+const io = new Server(PORT, {
+  cors: { origin: "*" } // Tillåt alla klienter att ansluta
+});
 
-wss.on("connection", ws => {
-  console.log("🟢 Ny klient ansluten");
+console.log(`✅ Sanctuary BotServer är igång på port ${PORT}`);
 
-  ws.on("message", data => {
-    try {
-      const msg = JSON.parse(data.toString());
-      if (msg.type === "heartbeat") return; // Ignorera pingar
+// När en klient ansluter
+io.on("connection", (socket) => {
+  console.log("🟢 Ny klient ansluten:", socket.id);
 
-      // Skicka vidare till alla andra anslutna klienter
-      wss.clients.forEach(client => {
-        if (client !== ws && client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify(msg));
-        }
-      });
-    } catch (err) {
-      console.error("❌ Fel i inkommande data:", err);
-    }
+  // Ta emot meddelanden från klienter
+  socket.on("message", (msg) => {
+    // Skicka vidare till alla andra anslutna klienter
+    socket.broadcast.emit("message", msg);
   });
 
-  ws.on("close", () => console.log("🔴 Klient frånkopplad"));
+  // När klienten disconnectar
+  socket.on("disconnect", (reason) => {
+    console.log("🔴 Klient frånkopplad:", socket.id, "-", reason);
+  });
 });
