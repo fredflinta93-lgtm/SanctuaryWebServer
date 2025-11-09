@@ -1,0 +1,19 @@
+# Ignorera node-modules (installeras automatiskt med npm install)
+node_modules/
+
+# Loggar och temporära filer
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Miljövariabler
+.env
+
+# OS-specifika filer
+.DS_Store
+Thumbs.db
+
+# Backupfiler
+*.bak
+*.tmp
